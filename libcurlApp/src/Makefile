@@ -25,7 +25,7 @@ USR_CPPFLAGS_WIN32 += -DWIN32 -D_BIND_TO_CURRENT_VCLIBS_VERSION=1
 USR_INCLUDES += -I$(CURLSRC)/include
 
 ifeq ($(STATIC_BUILD),YES)
-USR_CFLAGS += -DCURL_STATICLIB
+USR_CPPFLAGS += -DCURL_STATICLIB
 endif
 
 # specify all source files to be compiled and added to the library
