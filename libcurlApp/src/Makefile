@@ -206,4 +206,7 @@ curl_SYS_LIBS_WIN32 += ws2_32 wldap32 advapi32
 include $(TOP)/configure/RULES
 #----------------------------------------
 #  ADD RULES AFTER THIS LINE
+install :
+	-$(MKDIR) $(INSTALL_LOCATION)/include/curl
+	$(CP) $(CURLSRC)/include/curl/*.h $(INSTALL_LOCATION)/include/curl
 
