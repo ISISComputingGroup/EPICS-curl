@@ -199,6 +199,7 @@ curl_SRCS += \
 	
 curl_RCS += curl.res
 
+libcurl_LIBS += zlib
 curl_LIBS += libcurl zlib
 #curl_LIBS += $(EPICS_BASE_IOC_LIBS)
 curl_SYS_LIBS_WIN32 += ws2_32 wldap32 advapi32
