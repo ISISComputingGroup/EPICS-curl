@@ -15,7 +15,7 @@ LIBRARY_IOC += libcurl
 # install libcurl.dbd into <top>/dbd
 #DBD += libcurl.dbd
 
-CURLSRC=$(TOP)/curl-7.40.0
+CURLSRC=$(TOP)/curl-src
 
 SRC_DIRS += $(CURLSRC)/lib
 SRC_DIRS += $(CURLSRC)/lib/vtls
