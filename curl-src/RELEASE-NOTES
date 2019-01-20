@@ -1,183 +1,194 @@
-Curl and libcurl 7.40.0
+curl and libcurl 7.63.0
 
- Public curl releases:         143
- Command line options:         162
- curl_easy_setopt() options:   208
- Public functions in libcurl:  58
- Contributors:                 1219
+ Public curl releases:         178
+ Command line options:         219
+ curl_easy_setopt() options:   262
+ Public functions in libcurl:  80
+ Contributors:                 1829
 
 This release includes the following changes:
 
- o http_digest: Added support for Windows SSPI based authentication
- o version info: Added Kerberos V5 to the supported features
- o Makefile: Added VC targets for WinIDN
- o config-win32: Introduce build targets for VS2012+
- o SSL: Add PEM format support for public key pinning
- o smtp: Added support for the conversion of Unix newlines during mail send [8]
- o smb: Added initial support for the SMB/CIFS protocol
- o Added support for HTTP over unix domain sockets, via
-   CURLOPT_UNIX_SOCKET_PATH and --unix-socket
- o sasl: Added support for GSS-API based Kerberos V5 authentication
+ o curl: add %{stderr} and %{stdout} for --write-out [24]
+ o curl: add undocumented option --dump-module-paths for win32 [19]
+ o setopt: add CURLOPT_CURLU [27]
 
 This release includes the following bugfixes:
 
- o darwinssl: fix session ID keys to only reuse identical sessions [18]
- o url-parsing: reject CRLFs within URLs [19]
- o OS400: Adjust specific support to last release
- o THANKS: Remove duplicate names
- o url.c: Fixed compilation warning
- o ssh: Fixed build on platforms where R_OK is not defined [1]
- o tool_strdup.c: include the tool strdup.h
- o build: Fixed Visual Studio project file generation of strdup.[c|h]
- o curl_easy_setopt.3: add CURLOPT_PINNEDPUBLICKEY [2]
- o curl.1: show zone index use in a URL
- o mk-ca-bundle.vbs: switch to new certdata.txt url
- o Makefile.dist: Added some missing SSPI configurations
- o build: Fixed no NTLM support for email when CURL_DISABLE_HTTP is defined
- o SSH: use the port number as well for known_known checks [3]
- o libssh2: detect features based on version, not configure checks
- o http2: Deal with HTTP/2 data inside Upgrade response header buffer [4]
- o multi: removed Curl_multi_set_easy_connection
- o symbol-scan.pl: do not require autotools
- o cmake: add ENABLE_THREADED_RESOLVER, rename ARES
- o cmake: build libhostname for test suite
- o cmake: fix HAVE_GETHOSTNAME definition
- o tests: fix libhostname visibility
- o tests: fix memleak in server/resolve.c
- o vtls.h: Fixed compiler warning when compiled without SSL
- o CMake: Restore order-dependent header checks
- o CMake: Restore order-dependent library checks
- o tool: Removed krb4 from the supported features
- o http2: Don't send Upgrade headers when we already do HTTP/2
- o examples: Don't call select() to sleep on windows [6]
- o win32: Updated some legacy APIs to use the newer extended versions [5]
- o easy.c: Fixed compilation warning when no verbose string support
- o connect.c: Fixed compilation warning when no verbose string support
- o build: in Makefile.m32 pass -F flag to windres
- o build: in Makefile.m32 add -m32 flag for 32bit
- o multi: when leaving for timeout, close accordingly
- o CMake: Simplify if() conditions on check result variables
- o build: in Makefile.m32 try to detect 64bit target
- o multi: inform about closed sockets before they are closed
- o multi-uv.c: close the file handle after download
- o examples: Wait recommended 100ms when no file descriptors are ready
- o ntlm: Split the SSPI based messaging code from the native messaging code
- o cmake: fix NTLM detection when CURL_DISABLE_HTTP defined
- o cmake: add Kerberos to the supported feature
- o CURLOPT_POSTFIELDS.3: mention the COPYPOSTFIELDS option
- o http: Disable pipelining for HTTP/2 and upgraded connections
- o ntlm: Fixed static'ness of local decode function
- o sasl: Reduced the need for two sets of NTLM messaging functions
- o multi.c: Fixed compilation warnings when no verbose string support
- o select.c: fix compilation for VxWorks [7]
- o multi-single.c: switch to use curl_multi_wait
- o curl_multi_wait.3: clarify numfds being used if not NULL
- o http.c: Fixed compilation warnings from features being disabled
- o NSS: enable the CAPATH option [9]
- o docs: Fix FAILONERROR typos
- o HTTP: don't abort connections with pending Negotiate authentication
- o HTTP: Free (proxy)userpwd for NTLM/Negotiate after sending a request
- o http_perhapsrewind: don't abort CONNECT requests
- o build: updated dependencies in makefiles
- o multi.c: Fixed compilation warning
- o ftp.c: Fixed compilation warnings when proxy support disabled
- o get_url_file_name: Fixed crash on OOM on debug build
- o cookie.c: Refactored cleanup code to simplify
- o OS400: enable NTLM authentication
- o ntlm: Use Windows Crypt API
- o http2: avoid logging neg "failure" if h2 was not requested
- o schannel_recv: return the correct code [10]
- o VC build: added sspi define for winssl-zlib builds
- o Curl_client_write(): chop long data, convert data only once
- o openldap: do not ignore Curl_client_write() return code
- o ldap: check Curl_client_write() return codes
- o parsedate.c: Fixed compilation warning
- o url.c: Fixed compilation warning when USE_NTLM is not defined
- o ntlm_wb_response: fix "statement not reached" [11]
- o telnet: fix "cast increases required alignment of target type"
- o smtp: Fixed dot stuffing when EOL characters at end of input buffers [12]
- o ntlm: Allow NTLM2Session messages when USE_NTRESPONSES manually defined
- o ntlm: Disable NTLM v2 when 64-bit integers are not supported
- o ntlm: Use short integer when decoding 16-bit values
- o ftp.c: Fixed compilation warning when no verbose string support
- o synctime.c: fixed timeserver URLs
- o mk-ca-bundle.pl: restored forced run again
- o ntlm: Fixed return code for bad type-2 Target Info
- o curl_schannel.c: Data may be available before connection shutdown
- o curl_schannel: Improvements to memory re-allocation strategy [13]
- o darwinssl: aprintf() to allocate the session key
- o tool_util.c: Use GetTickCount64 if it is available
- o lib: Fixed multiple code analysis warnings if SAL are available
- o tool_binmode.c: Explicitly ignore the return code of setmode
- o tool_urlglob.c: Silence warning C6293: Ill-defined for-loop
- o opts: Warn CURLOPT_TIMEOUT overrides when set after CURLOPT_TIMEOUT_MS
- o SFTP: work-around servers that return zero size on STAT [14]
- o connect: singleipconnect(): properly try other address families after failure
- o IPV6: address scope != scope id [15]
- o parseurlandfillconn(): fix improper non-numeric scope_id stripping [16]
- o secureserver.pl: make OpenSSL CApath and cert absolute path values
- o secureserver.pl: update Windows detection and fix path conversion
- o secureserver.pl: clean up formatting of config and fix verbose output
- o tests: Added Windows support using Cygwin-based OpenSSH
- o sockfilt.c: use non-Ex functions that are available before WinXP
- o VMS: Updates for 0740-0D1220
- o openssl: warn for SRP set if SSLv3 is used, not for TLS version
- o openssl: make it compile against openssl 1.1.0-DEV master branch
- o openssl: fix SSL/TLS versions in verbose output
- o curl: show size of inhibited data when using -v
- o build: Removed WIN32 definition from the Visual Studio projects
- o build: Removed WIN64 definition from the libcurl Visual Studio projects
- o vtls: Use bool for Curl_ssl_getsessionid() return type
- o sockfilt.c: Replace 100ms sleep with thread throttle
- o sockfilt.c: Reduce the number of individual memory allocations
- o vtls: Don't set cert info count until memory allocation is successful
- o nss: Don't ignore Curl_ssl_init_certinfo() OOM failure
- o nss: Don't ignore Curl_extract_certinfo() OOM failure
- o vtls: Fixed compilation warning and an ignored return code
- o sockfilt.c: Fixed compilation warnings
- o darwinssl: Fixed compilation warning
- o vtls: Use '(void) arg' for unused parameters
- o sepheaders.c: Fixed resource leak on failure
- o lib1900.c: Fixed cppcheck error [17]
- o ldap: Fixed Unicode connection details in Win32 initialsation / bind calls
- o ldap: Fixed Unicode DN, attributes and filter in Win32 search calls
+ o (lib)curl.rc: fixup for minor bugs [63]
+ o CURLINFO_REDIRECT_URL: extract the Location: header field unvalidated [73]
+ o CURLOPT_HEADERFUNCTION.3: match 'nitems' name in synopsis and description [45]
+ o CURLOPT_WRITEFUNCTION.3: spell out that it gets called many times
+ o Curl_follow: accept non-supported schemes for "fake" redirects [9]
+ o KNOWN_BUGS: add --proxy-any connection issue [28]
+ o NTLM: Remove redundant ifdef USE_OPENSSL [41]
+ o NTLM: force the connection to HTTP/1.1 [67]
+ o OS400: add URL API ccsid wrappers and sync ILE/RPG bindings
+ o SECURITY-PROCESS: bountygraph shuts down again [50]
+ o TODO: Have the URL API offer IDN decoding [22]
+ o ares: remove fd from multi fd set when ares is about to close the fd [42]
+ o axtls: removed [1]
+ o checksrc: add COPYRIGHTYEAR check [62]
+ o cmake: fix MIT/Heimdal Kerberos detection [53]
+ o configure: include all libraries in ssl-libs fetch [55]
+ o configure: show CFLAGS, LDFLAGS etc in summary [7]
+ o connect: fix building for recent versions of Minix [52]
+ o cookies: create the cookiejar even if no cookies to save [48]
+ o cookies: expire "Max-Age=0" immediately [64]
+ o curl: --local-port range was not "including" [29]
+ o curl: fix --local-port integer overflow [25]
+ o curl: fix memory leak reading --writeout from file [51]
+ o curl: fixed UTF-8 in current console code page (Windows) [16]
+ o curl_easy_perform: fix timeout handling [49]
+ o curl_global_sslset(): id == -1 is not necessarily an error [68]
+ o curl_multibyte: fix a malloc overcalculation [18]
+ o curle: move deprecated error code to ifndef block [40]
+ o docs: curl_formadd field and file names are now escaped [72]
+ o docs: escape "\n" codes [26]
+ o doh: fix memory leak in OOM situation [56]
+ o doh: make it work for h2-disabled builds too [57]
+ o examples/ephiperfifo: report error when epoll_ctl fails
+ o ftp: avoid two unsigned int overflows in FTP listing parser [30]
+ o host names: allow trailing dot in name resolve, then strip it [46]
+ o http2: Upon HTTP_1_1_REQUIRED, retry the request with HTTP/1.1 [65]
+ o http: don't set CURLINFO_CONDITION_UNMET for http status code 204 [70]
+ o http: fix HTTP Digest auth to include query in URI [69]
+ o http_negotiate: do not close connection until negotiation is completed [36]
+ o impacket: add LICENSE [39]
+ o infof: clearly indicate truncation [14]
+ o ldap: fix LDAP URL parsing regressions [71]
+ o libcurl: stop reading from paused transfers [20]
+ o mprintf: avoid unsigned integer overflow warning [10]
+ o netrc: don't ignore the login name specified with "--user" [17]
+ o nss: Fall back to latest supported SSL version [60]
+ o nss: Fix compatibility with nss versions 3.14 to 3.15 [61]
+ o nss: fix fallthrough comment to fix picky compiler warning
+ o nss: remove version selecting dead code [33]
+ o nss: set default max-tls to 1.3/1.2 [32]
+ o openssl: Remove SSLEAY leftovers [37]
+ o openssl: do not log excess "TLS app data" lines for TLS 1.3 [34]
+ o openssl: do not use file BIOs if not requested [59]
+ o openssl: fix unused variable compiler warning with old openssl [66]
+ o openssl: support session resume with TLS 1.3 [44]
+ o openvms: fix example name [8]
+ o os400: Add curl_easy_conn_upkeep() to ILE/RPG binding
+ o os400: add CURLOPT_CURLU to ILE/RPG binding
+ o os400: fix return type of curl_easy_pause() in ILE/RPG binding
+ o packages: remove old leftover files and dirs [58]
+ o pop3: only do APOP with a valid timestamp [35]
+ o runtests: use the local curl for verifying [6]
+ o schannel: be consistent in Schannel capitalization [23]
+ o schannel: better CURLOPT_CERTINFO support [2]
+ o schannel: use Curl_ prefix for global private symbols [4]
+ o snprintf: renamed and we now only use msnprintf() [47]
+ o ssl: fix compilation with OpenSSL 0.9.7 [43]
+ o ssl: replace all internal uses of CURLE_SSL_CACERT [40]
+ o symbols-in-versions: add missing CURLU_ symbols [15]
+ o test328: verify Content-Encoding: none [54]
+ o tests: disable SO_EXCLUSIVEADDRUSE for stunnel on Windows
+ o tests: drop http_pipe.py script no longer used [5]
+ o tool_cb_wrt: Silence function cast compiler warning [31]
+ o tool_doswin: Fix uninitialized field warning [38]
+ o travis: build with clang sanitizers [3]
+ o travis: remove curl before a normal build [11]
+ o url: a short host name + port is not a scheme [13]
+ o url: fix IPv6 numeral address parser [12]
+ o urlapi: only skip encoding the first '=' with APPENDQUERY set [21]
 
 This release includes the following known bugs:
 
- o see docs/KNOWN_BUGS (http://curl.haxx.se/docs/knownbugs.html)
+ o see docs/KNOWN_BUGS (https://curl.haxx.se/docs/knownbugs.html)
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Andrey Labunets, Anthon Pang, Bill Nagel, Brad Harder, Brad King, Carlo Wood,
-  Christian Hägele, Dan Fandrich, Daniel Stenberg, Dave Reisner, Frank Gevaerts,
-  Gisle Vanem, Guenter Knauf, Jan Ehrhardt, Johan Lantz, John E. Malmberg,
-  Jon Spencer, Julien Nabet, Kamil Dudka, Kyle J. McKay, Lucas Pardue,
-  Marc Hesse, Marc Hoersken, Marc Renault, Michael Osipov, Nick Zitzmann,
-  Nobuhiro Ban, Patrick Monnerat, Peter Wu, Ray Satiro, Sam Hurst,
-  Stefan Bühler, Stefan Neis, Steve Holme, Tae Hyoung Ahn, Tatsuhiro Tsujikawa,
-  Tomasz Kojm, Tor Arntsen, Waldek Kozba, Warren Menzer
+  Alessandro Ghedini, Alexey Melnichuk, Antoni Villalonga, Ben Greear,
+  bobmitchell1956 on github, Brad King, Brian Carpenter, daboul on github,
+  Daniel Gustafsson, Daniel Stenberg, Dave Reisner, David Benjamin,
+  Dheeraj Sangamkar, dtmsecurity on github, Elia Tufarolo, Frank Gevaerts,
+  Gergely Nagy, Gisle Vanem, Hagai Auro, Han Han, infinnovation-dev on github,
+  James Knight, Jérémy Rocher, Jeroen Ooms, Jim Fuller, Johannes Schindelin,
+  Kamil Dudka, Konstantin Kushnir, Marcel Raad, Marc Hörsken, Marcos Diazr,
+  Michael Kaufmann, NTMan on Github, Patrick Monnerat, Paul Howarth,
+  Pavel Pavlov, Peter Wu, Ray Satiro, Rod Widdowson, Romain Fliedel,
+  Samuel Surtees, Sevan Janiyan, Stefan Kanthak, Sven Blumenstein, Tim Rühsen,
+  Tobias Hintze, Tomas Hoger, tonystz on Github, tpaukrt on github,
+  Viktor Szakats, Yasuhiro Matsumoto,
+  (51 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = http://curl.haxx.se/mail/lib-2014-11/0035.html
- [2] = http://curl.haxx.se/mail/lib-2014-11/0078.html
- [3] = http://curl.haxx.se/bug/view.cgi?id=1448
- [4] = https://github.com/tatsuhiro-t/nghttp2/issues/103
- [5] = http://sourceforge.net/p/curl/feature-requests/82/
- [6] = http://curl.haxx.se/mail/lib-2014-11/0221.html
- [7] = http://curl.haxx.se/bug/view.cgi?id=1455
- [8] = http://curl.haxx.se/bug/view.cgi?id=1456
- [9] = http://curl.haxx.se/bug/view.cgi?id=1457
- [10] = http://curl.haxx.se/bug/view.cgi?id=1462
- [11] = http://curl.haxx.se/mail/lib-2014-12/0089.html
- [12] = http://curl.haxx.se/bug/view.cgi?id=1456
- [13] = http://curl.haxx.se/bug/view.cgi?id=1450
- [14] = http://curl.haxx.se/mail/lib-2014-12/0103.html
- [15] = http://curl.haxx.se/bug/view.cgi?id=1451
- [16] = http://curl.haxx.se/bug/view.cgi?id=1449
- [17] = https://github.com/bagder/curl/pull/133
- [18] = http://curl.haxx.se/docs/adv_20150108A.html
- [19] = http://curl.haxx.se/docs/adv_20150108B.html
+ [1] = https://curl.haxx.se/bug/?i=3194
+ [2] = https://curl.haxx.se/bug/?i=3197
+ [3] = https://curl.haxx.se/bug/?i=3190
+ [4] = https://curl.haxx.se/bug/?i=3201
+ [5] = https://curl.haxx.se/bug/?i=3204
+ [6] = https://curl.haxx.se/mail/lib-2018-10/0118.html
+ [7] = https://curl.haxx.se/bug/?i=3207
+ [8] = https://curl.haxx.se/bug/?i=3217
+ [9] = https://curl.haxx.se/bug/?i=3210
+ [10] = https://curl.haxx.se/bug/?i=3184
+ [11] = https://curl.haxx.se/bug/?i=3198
+ [12] = https://curl.haxx.se/bug/?i=3218
+ [13] = https://curl.haxx.se/bug/?i=3220
+ [14] = https://curl.haxx.se/bug/?i=3216
+ [15] = https://curl.haxx.se/bug/?i=3226
+ [16] = https://curl.haxx.se/bug/?i=3211
+ [17] = https://curl.haxx.se/bug/?i=3213
+ [18] = https://curl.haxx.se/bug/?i=3209
+ [19] = https://curl.haxx.se/bug/?i=3208
+ [20] = https://curl.haxx.se/bug/?i=3240
+ [21] = https://curl.haxx.se/bug/?i=3231
+ [22] = https://curl.haxx.se/bug/?i=3232
+ [23] = https://curl.haxx.se/bug/?i=3243
+ [24] = https://curl.haxx.se/bug/?i=3115
+ [25] = https://curl.haxx.se/bug/?i=3242
+ [26] = https://curl.haxx.se/bug/?i=3246
+ [27] = https://curl.haxx.se/bug/?i=3227
+ [28] = https://curl.haxx.se/bug/?i=876
+ [29] = https://curl.haxx.se/bug/?i=3251
+ [30] = https://curl.haxx.se/bug/?i=3225
+ [31] = https://curl.haxx.se/bug/?i=3263
+ [32] = https://curl.haxx.se/bug/?i=3261
+ [33] = https://curl.haxx.se/bug/?i=3262
+ [34] = https://curl.haxx.se/bug/?i=3281
+ [35] = https://curl.haxx.se/bug/?i=3278
+ [36] = https://curl.haxx.se/bug/?i=3275
+ [37] = https://curl.haxx.se/bug/?i=3270
+ [38] = https://curl.haxx.se/bug/?i=3254
+ [39] = https://curl.haxx.se/bug/?i=3276
+ [40] = https://curl.haxx.se/bug/?i=3291
+ [41] = https://curl.haxx.se/bug/?i=3269
+ [42] = https://curl.haxx.se/bug/?i=3238
+ [43] = https://curl.haxx.se/bug/?i=3266
+ [44] = https://curl.haxx.se/bug/?i=3202
+ [45] = https://curl.haxx.se/bug/?i=3295
+ [46] = https://curl.haxx.se/bug/?i=3022
+ [47] = https://curl.haxx.se/bug/?i=3296
+ [48] = https://curl.haxx.se/bug/?i=3299
+ [49] = https://curl.haxx.se/bug/?i=3305
+ [50] = https://curl.haxx.se/bug/?i=3311
+ [51] = https://curl.haxx.se/bug/?i=3322
+ [52] = https://curl.haxx.se/bug/?i=3323
+ [53] = https://curl.haxx.se/bug/?i=3316
+ [54] = https://curl.haxx.se/bug/?i=3317
+ [55] = https://curl.haxx.se/bug/?i=3193
+ [56] = https://curl.haxx.se/bug/?i=3342
+ [57] = https://curl.haxx.se/bug/?i=3325
+ [58] = https://curl.haxx.se/bug/?i=3331
+ [59] = https://curl.haxx.se/bug/?i=3339
+ [60] = https://curl.haxx.se/bug/?i=3261
+ [61] = https://curl.haxx.se/bug/?i=3337
+ [62] = https://curl.haxx.se/bug/?i=3303
+ [63] = https://curl.haxx.se/bug/?i=3348
+ [64] = https://curl.haxx.se/bug/?i=3351
+ [65] = https://curl.haxx.se/bug/?i=3349
+ [66] = https://curl.haxx.se/bug/?i=3337
+ [67] = https://curl.haxx.se/bug/?i=3345
+ [68] = https://curl.haxx.se/bug/?i=3346
+ [69] = https://curl.haxx.se/bug/?i=3353
+ [70] = https://curl.haxx.se/bug/?i=3359
+ [71] = https://curl.haxx.se/bug/?i=3362
+ [72] = https://curl.haxx.se/bug/?i=3361
+ [73] = https://curl.haxx.se/bug/?i=3340
