@@ -28,6 +28,7 @@ CONFIG_FLAGS += DEBUG=yes
 INSTALL_DIR := $(INSTALL_DIR)-debug
 else
 CONFIG_FLAGS += DEBUG=no
+INSTALL_DIR := $(INSTALL_DIR)-release
 endif
 
 ifneq ($(findstring static,$(EPICS_HOST_ARCH)),)
