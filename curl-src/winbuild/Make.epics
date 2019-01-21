@@ -1,0 +1,73 @@
+# Note: called Make.epics rather than Makefile.epics due to .gitignore rule
+
+TOP=../..
+
+include $(TOP)/configure/CONFIG
+
+# remove EPICS default of -w which nmake does not like
+override MAKEFLAGS=
+
+# install directory name depends on configure options chosen
+INSTALL_DIR = $(TOP)/curl-src/builds/libcurl-vc
+
+# generate build option flags
+# not using WITH_SSL or SSL_PATH at moment
+#CONFIG_FLAGS = GEN_PDB=yes ZLIB_PATH=$(ZLIB) ENABLE_WINSSL=no WITH_SSL=dll SSL_PATH=$(OPENSSL)
+CONFIG_FLAGS = GEN_PDB=yes ZLIB_PATH=$(ZLIB) ENABLE_WINSSL=yes
+
+ifneq ($(findstring win32-x86,$(EPICS_HOST_ARCH)),)
+CONFIG_FLAGS += MACHINE=x86
+INSTALL_DIR := $(INSTALL_DIR)-x86
+else
+CONFIG_FLAGS += MACHINE=x64
+INSTALL_DIR := $(INSTALL_DIR)-x64
+endif
+
+ifneq ($(findstring debug,$(EPICS_HOST_ARCH)),)
+CONFIG_FLAGS += DEBUG=yes
+INSTALL_DIR := $(INSTALL_DIR)-debug
+else
+CONFIG_FLAGS += DEBUG=no
+endif
+
+ifneq ($(findstring static,$(EPICS_HOST_ARCH)),)
+# RTLIBCFG=static forces compile with /MT rather than /MD
+CONFIG_FLAGS += mode=static WITH_ZLIB=static RTLIBCFG=static
+INSTALL_DIR := $(INSTALL_DIR)-static-zlib-static
+else
+CONFIG_FLAGS += mode=dll WITH_ZLIB=dll
+INSTALL_DIR := $(INSTALL_DIR)-dll-zlib-dll
+endif
+
+INSTALL_DIR := $(INSTALL_DIR)-ipv6-sspi-winssl
+
+include $(TOP)/configure/RULES
+
+#----------------------------------------
+#  ADD RULES AFTER THIS LINE
+
+
+# need to rename .lib on an install as it may be called e.g. libcurl_debug.lib
+ifdef T_A
+install:
+	nmake -f Makefile.vc $(CONFIG_FLAGS)
+	-$(MKDIR) $(TOP)/bin
+	-$(MKDIR) $(TOP)/bin/$(T_A)
+	-$(MKDIR) $(TOP)/lib
+	-$(MKDIR) $(TOP)/lib/$(T_A)
+	-$(MKDIR) $(TOP)/include
+	-$(MKDIR) $(TOP)/include/curl
+	$(CP) -f $(INSTALL_DIR)/include/curl/*.h $(TOP)/include/curl/
+	$(CP) -f $(INSTALL_DIR)/bin/*.* $(TOP)/bin/$(T_A)/
+	$(CP) -f $(INSTALL_DIR)/lib/libcurl*.lib $(TOP)/lib/$(T_A)/libcurl.lib
+	$(CP) -f $(INSTALL_DIR)/lib/*.pdb $(TOP)/bin/$(T_A)/
+endif
+
+ifeq ($(BASE_3_14),YES)
+clean:: myclean
+else
+clean: myclean
+endif
+
+myclean:
+	nmake -f Makefile.vc $(CONFIG_FLAGS) clean 
