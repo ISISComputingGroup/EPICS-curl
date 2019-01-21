@@ -16,3 +16,9 @@ relPaths.sh
 /curl-src/builds/
 /curl-src/winbuild/LIBCURL_OBJS.inc
 /curl-src/winbuild/CURL_OBJS.inc
+*.obj
+*.o
+*.lo
+.deps/
+config.log
+config.status
