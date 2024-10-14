@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,27 +18,31 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 /* <DESC>
- * An example demonstrating how an application can pass in a custom
- * socket to libcurl to use. This example also handles the connect itself.
+ * Pass in a custom socket for libcurl to use.
  * </DESC>
  */
+#ifdef _WIN32
+#ifndef _WINSOCK_DEPRECATED_NO_WARNINGS
+#define _WINSOCK_DEPRECATED_NO_WARNINGS  /* for inet_addr() */
+#endif
+#endif
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <curl/curl.h>
 
-#ifdef WIN32
-#include <windows.h>
-#include <winsock2.h>
-#include <ws2tcpip.h>
+#ifdef _WIN32
 #define close closesocket
 #else
 #include <sys/types.h>        /*  socket types              */
 #include <sys/socket.h>       /*  socket definitions        */
 #include <netinet/in.h>
-#include <arpa/inet.h>        /*  inet (3) functions         */
+#include <arpa/inet.h>        /*  inet (3) functions        */
 #include <unistd.h>           /*  misc. Unix functions      */
 #endif
 
@@ -95,10 +99,10 @@ int main(void)
   struct sockaddr_in servaddr;  /*  socket address structure  */
   curl_socket_t sockfd;
 
-#ifdef WIN32
+#ifdef _WIN32
   WSADATA wsaData;
-  int initwsa = WSAStartup(MAKEWORD(2, 0), &wsaData);
-  if(initwsa != 0) {
+  int initwsa = WSAStartup(MAKEWORD(2, 2), &wsaData);
+  if(initwsa) {
     printf("WSAStartup failed: %d\n", initwsa);
     return 1;
   }
@@ -107,8 +111,8 @@ int main(void)
   curl = curl_easy_init();
   if(curl) {
     /*
-     * Note that libcurl will internally think that you connect to the host
-     * and port that you specify in the URL option.
+     * Note that libcurl internally thinks that you connect to the host and
+     * port that you specify in the URL option.
      */
     curl_easy_setopt(curl, CURLOPT_URL, "http://99.99.99.99:9999");
 
@@ -124,8 +128,10 @@ int main(void)
     servaddr.sin_port   = htons(PORTNUM);
 
     servaddr.sin_addr.s_addr = inet_addr(IPADDR);
-    if(INADDR_NONE == servaddr.sin_addr.s_addr)
+    if(INADDR_NONE == servaddr.sin_addr.s_addr) {
+      close(sockfd);
       return 2;
+    }
 
     if(connect(sockfd, (struct sockaddr *) &servaddr, sizeof(servaddr)) ==
        -1) {
@@ -157,10 +163,16 @@ int main(void)
 
     curl_easy_cleanup(curl);
 
+    close(sockfd);
+
     if(res) {
       printf("libcurl error: %d\n", res);
       return 4;
     }
   }
+
+#ifdef _WIN32
+  WSACleanup();
+#endif
   return 0;
 }

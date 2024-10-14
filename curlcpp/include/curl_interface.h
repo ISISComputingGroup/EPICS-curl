@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2014 - Giuseppe Persico
+ * Copyright (c) 2023 - Giuseppe Persico
  * File - curl_interface.h
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,13 +23,11 @@
  * SOFTWARE.
  */
 
-#ifndef curl_interface_H
-#define	curl_interface_H
+#ifndef CURLCPP_CURL_INTERFACE_H
+#define CURLCPP_CURL_INTERFACE_H
 
 #include <curl/curl.h>
 #include "curl_exception.h"
-
-using curl::curl_exception;
 
 namespace curl {
     /**
@@ -48,35 +46,60 @@ namespace curl {
          * Overloaded constructor that initializes curl environment
          * with user specified flag.
          */
-        explicit curl_interface(const long);
+        explicit curl_interface(long);
         /**
          * The virtual destructor will provide an easy and clean
          * way to deallocate resources, closing curl environment
          * correctly.
          */
         virtual ~curl_interface();
+
+    private:
+        /**
+         * This struct is used for initializing curl only once
+         * it is implemented as a singleton pattern
+         */
+        struct global_initializer {
+            explicit global_initializer(long);
+            ~global_initializer();
+        };
+
+        /**
+         * the singleton initialization, constructing a global_initializer.
+         */
+        static void init(long flag);
     };
-    
+
     // Implementation of constructor.
     template<class T> curl_interface<T>::curl_interface() {
-        const CURLcode code = curl_global_init(CURL_GLOBAL_ALL);
-        if (code != CURLE_OK) {
-            throw curl_easy_exception(code,__FUNCTION__);
-        }
+        init(CURL_GLOBAL_ALL);
     }
-    
+
     // Implementation of overloaded constructor.
     template<class T> curl_interface<T>::curl_interface(const long flag) {
+        init(flag);
+    }
+
+    // Implementation of the virtual destructor.
+    template<class T> curl_interface<T>::~curl_interface() = default;
+
+    // Implementation of the static initialization function
+    template<class T> void curl_interface<T>::init(const long flag) {
+        static global_initializer _instance {flag};
+    }
+
+    // Implementation of the singleton initializer
+    template<class T> curl_interface<T>::global_initializer::global_initializer(const long flag) {
         const CURLcode code = curl_global_init(flag);
         if (code != CURLE_OK) {
             throw curl_easy_exception(code,__FUNCTION__);
         }
     }
-    
-    // Implementation of the virtual destructor.
-    template<class T> curl_interface<T>::~curl_interface() {
+
+    // Implementation of the singleton destructor
+    template<class T> curl_interface<T>::global_initializer::~global_initializer() {
         curl_global_cleanup();
     }
 }
 
-#endif	/* curl_interface_H */
+#endif	/* defined(CURLCPP_CURL_INTERFACE_H) */

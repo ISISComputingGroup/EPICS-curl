@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 #include "test.h"
@@ -36,35 +38,42 @@ struct WriteThis {
   int counter;
 };
 
+static bool started = FALSE;
+static size_t last_ul = 0;
+static size_t last_ul_total = 0;
+
+static void progress_final_report(void)
+{
+  FILE *moo = fopen(libtest_arg2, "ab");
+  fprintf(moo, "Progress: end UL %zu/%zu\n", last_ul, last_ul_total);
+  started = FALSE;
+  fclose(moo);
+}
+
 static int progress_callback(void *clientp, double dltotal, double dlnow,
                              double ultotal, double ulnow)
 {
-  static int prev_ultotal = -1;
-  static int prev_ulnow = -1;
   (void)clientp; /* UNUSED */
   (void)dltotal; /* UNUSED */
   (void)dlnow; /* UNUSED */
 
-  /* to avoid depending on timing, which will cause this progress function to
-     get called a different number of times depending on circumstances, we
-     only log these lines if the numbers are different from the previous
-     invoke */
-  if((prev_ultotal != (int)ultotal) ||
-     (prev_ulnow != (int)ulnow)) {
-
-    FILE *moo = fopen(libtest_arg2, "ab");
-    if(moo) {
-      fprintf(moo, "Progress callback called with UL %d out of %d\n",
-              (int)ulnow, (int)ultotal);
-      fclose(moo);
-    }
-    prev_ulnow = (int) ulnow;
-    prev_ultotal = (int) ultotal;
+  if(started && ulnow <= 0.0 && last_ul) {
+    progress_final_report();
   }
+
+  last_ul = (size_t)ulnow;
+  last_ul_total = (size_t)ultotal;
+  if(!started) {
+    FILE *moo = fopen(libtest_arg2, "ab");
+    fprintf(moo, "Progress: start UL %zu/%zu\n", last_ul, last_ul_total);
+    started = TRUE;
+    fclose(moo);
+  }
+
   return 0;
 }
 
-static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *userp)
+static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   struct WriteThis *pooh = (struct WriteThis *)userp;
   const char *data;
@@ -83,7 +92,7 @@ static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *userp)
   return 0;                         /* no more data left to deliver */
 }
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
@@ -104,7 +113,7 @@ int test(char *URL)
   }
 
   slist = curl_slist_append(slist, "Transfer-Encoding: chunked");
-  if(slist == NULL) {
+  if(!slist) {
     fprintf(stderr, "curl_slist_append() failed\n");
     curl_easy_cleanup(curl);
     curl_global_cleanup();
@@ -116,11 +125,6 @@ int test(char *URL)
 
   /* Now specify we want to POST data */
   test_setopt(curl, CURLOPT_POST, 1L);
-
-#ifdef CURL_DOES_CONVERSIONS
-  /* Convert the POST data to ASCII */
-  test_setopt(curl, CURLOPT_TRANSFERTEXT, 1L);
-#endif
 
   /* we want to use our own read function */
   test_setopt(curl, CURLOPT_READFUNCTION, read_callback);
@@ -142,10 +146,14 @@ int test(char *URL)
 
   /* we want to use our own progress function */
   test_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-  test_setopt(curl, CURLOPT_PROGRESSFUNCTION, progress_callback);
+  CURL_IGNORE_DEPRECATION(
+    test_setopt(curl, CURLOPT_PROGRESSFUNCTION, progress_callback);
+  )
 
   /* Perform the request, res will get the return code */
   res = curl_easy_perform(curl);
+
+  progress_final_report();
 
 test_cleanup:
 

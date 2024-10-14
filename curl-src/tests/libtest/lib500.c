@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 #include "test.h"
@@ -57,7 +59,7 @@ static void setupcallbacks(CURL *curl)
 #endif
 
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   CURLcode res;
   CURL *curl;
@@ -99,13 +101,16 @@ int test(char *URL)
         curl_off_t time_namelookup;
         curl_off_t time_connect;
         curl_off_t time_pretransfer;
+        curl_off_t time_posttransfer;
         curl_off_t time_starttransfer;
         curl_off_t time_total;
-        fprintf(moo, "IP: %s\n", ipstr);
+        fprintf(moo, "IP %s\n", ipstr);
         curl_easy_getinfo(curl, CURLINFO_NAMELOOKUP_TIME_T, &time_namelookup);
         curl_easy_getinfo(curl, CURLINFO_CONNECT_TIME_T, &time_connect);
         curl_easy_getinfo(curl, CURLINFO_PRETRANSFER_TIME_T,
                           &time_pretransfer);
+        curl_easy_getinfo(curl, CURLINFO_POSTTRANSFER_TIME_T,
+                          &time_posttransfer);
         curl_easy_getinfo(curl, CURLINFO_STARTTRANSFER_TIME_T,
                           &time_starttransfer);
         curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME_T, &time_total);
@@ -126,6 +131,14 @@ int test(char *URL)
                   (time_pretransfer / 1000000),
                   (long)(time_pretransfer % 1000000));
         }
+        if(time_pretransfer > time_posttransfer) {
+          fprintf(moo, "pretransfer vs posttransfer: %" CURL_FORMAT_CURL_OFF_T
+                  ".%06ld %" CURL_FORMAT_CURL_OFF_T ".%06ld\n",
+                  (time_pretransfer / 1000000),
+                  (long)(time_pretransfer % 1000000),
+                  (time_posttransfer / 1000000),
+                  (long)(time_posttransfer % 1000000));
+        }
         if(time_pretransfer > time_starttransfer) {
           fprintf(moo, "pretransfer vs starttransfer: %" CURL_FORMAT_CURL_OFF_T
                   ".%06ld %" CURL_FORMAT_CURL_OFF_T ".%06ld\n",
@@ -141,6 +154,13 @@ int test(char *URL)
                   (long)(time_starttransfer % 1000000),
                   (time_total / 1000000), (long)(time_total % 1000000));
         }
+        if(time_posttransfer > time_total) {
+          fprintf(moo, "posttransfer vs total: %" CURL_FORMAT_CURL_OFF_T
+                  ".%06ld %" CURL_FORMAT_CURL_OFF_T ".%06ld\n",
+                  (time_posttransfer / 1000000),
+                  (long)(time_posttransfer % 1000000),
+                  (time_total / 1000000), (long)(time_total % 1000000));
+        }
 
         fclose(moo);
       }
@@ -152,5 +172,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return (int)res;
+  return res;
 }

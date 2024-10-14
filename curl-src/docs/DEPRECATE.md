@@ -1,66 +1,67 @@
+<!--
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+
+SPDX-License-Identifier: curl
+-->
+
 # Items to be removed from future curl releases
 
 If any of these deprecated features is a cause for concern for you, please
-email the curl-library mailing list as soon as possible and explain to us why
-this is a problem for you and how your use case can't be satisfied properly
-using a work around.
+email the
+[curl-library mailing list](https://lists.haxx.se/listinfo/curl-library)
+as soon as possible and explain to us why this is a problem for you and
+how your use case cannot be satisfied properly using a workaround.
 
-## HTTP pipelining
+## TLS libraries without 1.3 support
 
-HTTP pipelining is badly supported by curl in the sense that we have bugs and
-it is a fragile feature without enough tests. Also, when something turns out
-to have problems it is really tricky to debug due to the timing sensitivity so
-very often enabling debug outputs or similar completely changes the nature of
-the behavior and things are not reproducing anymore!
+curl drops support for TLS libraries without TLS 1.3 capability after May
+2025.
 
-HTTP pipelining was never enabled by default by the large desktop browsers due
-to all the issues with it. Both Firefox and Chrome have also dropped
-pipelining support entirely since a long time back now. We are in fact over
-time becoming more and more lonely in supporting pipelining.
+It requires that a curl build using the library should be able to negotiate
+and use TLS 1.3, or else it is not good enough.
 
-The bad state of HTTP pipelining was a primary driving factor behind HTTP/2
-and its multiplexing feature. HTTP/2 multiplexing is truly and really
-"pipelining done right". It is way more solid, practical and solves the use
-case in a better way with better performance and fewer downsides and problems.
+As of May 2024, the libraries that need to get fixed to remain supported after
+May 2025 are: BearSSL and Secure Transport.
 
-In 2018, pipelining *should* be abandoned and HTTP/2 should be used instead.
+## Hyper
 
-### State
+Hyper is an alternative HTTP backend for curl. It uses the hyper library and
+could in theory be used for HTTP/1, HTTP/2 and even HTTP/3 in the future with
+curl.
 
-In 7.62.0, we will add code that ignores the "enable pipeline" option
-setting). The *setopt() function would still return "OK" though so the
-application couldn't tell that this is happening.
+The original plan and goal was that we would add this HTTP alternative (using
+a memory-safe library) and that users could eventually build and use libcurl
+exactly as previously but with parts of the core being more memory-safe.
 
-Users who truly need pipelining from that version will need to modify the code
-(ever so slightly) and rebuild.
+The hyper implementation ran into some snags and 10-15 tests and HTTP/2
+support have remained disabled with hyper. For these reasons, hyper support
+has remained tagged EXPERIMENTAL.
 
-### Removal
+It is undoubtedly hard work to fix these remaining problems, as they typically
+require both rust and C knowledge in addition to deep HTTP familiarity. There
+does not seem to be that many persons interested or available for this
+challenge. Meanwhile, there is little if any demand for hyper from existing
+(lib)curl users.
 
-Six months later, in sync with the planned release happen in April 2019,
-(might be 7.66.0), assuming no major riots have occurred due to this in the
-mean time, we rip out the pipelining code. It is in the order of 1000 lines of
-libcurl code.
+Finally: having support for hyper in curl has a significant cost: we need to
+maintain and develop a lot of functionality and tests twice to make sure
+libcurl works identically using either HTTP backend.
 
-Left to answer: should the *setopt() function start to return error when these
-options are set to be able to tell when they're trying to use options that are
-no longer around or should we maintain behavior as much as possible?
+The only way to keep hyper support in curl is to give it a good polish by
+someone with time, skill and energy to spend on this task.
 
-## `CURLOPT_DNS_USE_GLOBAL_CACHE`
+Unless a significant overhaul has proven to be in progress, hyper support is
+removed from curl after February 2025.
 
-This option makes libcurl use a global non-thread-safe cache for DNS if
-enabled. The option has been marked as "obsolete" in the header file and in
-documentation for several years already.
+## Past removals
 
-There's proper and safe method alternative provided since many years: the
-share API.
-
-### State
-
-In curl 7.62.0 setting this option to TRUE will not have any effect. The
-global cache will not be enabled. The code still remains so it is easy to
-revert if need be.
-
-### Removal
-
-Remove all global-cache related code from curl around April 2019 (might be
-7.66.0).
+ - Pipelining
+ - axTLS
+ - PolarSSL
+ - NPN
+ - Support for systems without 64-bit data types
+ - NSS
+ - gskit
+ - MinGW v1
+ - NTLM_WB
+ - space-separated `NOPROXY` patterns
