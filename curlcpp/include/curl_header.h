@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2014 - Giuseppe Persico
+ * Copyright (c) 2023 - Giuseppe Persico
  * File - curl_header.h
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,17 +23,17 @@
  * SOFTWARE.
  */
 
-#ifndef curl_header_H
-#define	curl_header_H
+#ifndef CURLCPP_CURL_HEADER_H
+#define CURLCPP_CURL_HEADER_H
 
 #include <string>
 #include <initializer_list>
 #include <curl/curl.h>
 
-using std::string;
-using std::initializer_list;
+#include "curl_config.h"
 
 namespace curl {
+
     /**
      * This class represents a generic header. It allows a user to add
      * headers without caring about deallocation of resources.
@@ -49,7 +49,7 @@ namespace curl {
          * Overloaded constructor that allows users to initialize the
          * headers list with a list of values.
          */
-        curl_header(initializer_list<string>);
+        curl_header(std::initializer_list<std::string>);
         /**
          * Copy constructor. Performs a deep copy of the headers list.
          */
@@ -63,16 +63,16 @@ namespace curl {
          * The destructor will deallocate the resources used to handle
          * the headers list.
          */
-        ~curl_header() noexcept;
+        ~curl_header() NOEXCEPT;
         /**
          * This method allows users to add a header as string.
          */
-        void add(const string);
+        void add(const std::string&);
         /**
          * This method allows users to add headers specifying an iterable
          * data structure containing the headers to add.
          */
-        template<typename Iterator> void add(Iterator, const Iterator);
+        template<typename Iterator> void add(Iterator, Iterator);
         /**
          * Simple getter method that returns the pointer to the headers
          * list.
@@ -89,7 +89,7 @@ namespace curl {
     }
 
     // Implementation of copy constructor.
-    inline curl_header::curl_header(const curl_header &header) : headers(nullptr) {
+    inline curl_header::curl_header(const curl_header &header) : size(0), headers(nullptr) {
         *this = header;
     }
 
@@ -99,6 +99,40 @@ namespace curl {
             this->add(*begin);
         }
     }
+
+    /**
+     * Re-declaring template curl_pair, in case this is not in include path
+     */
+    template<class T, class K> class curl_pair;
+
+    /**
+     * Template specialization of curl_pair for curl_header type.
+     */
+    template<class T> class curl_pair<T,curl_header> {
+    public:
+        /**
+         * Thw two parameters constructor gives users a fast way to build an object
+         * of this type.
+         */
+        curl_pair(const T option, const curl_header &value) : option(option), value(value) {}
+        /**
+         * Simple method that returns the first field of the pair.
+         */
+        inline T first() const NOEXCEPT {
+            return this->option;
+        }
+        /**
+         * Simple method that returns the second field of the pair as a C struct 
+         * curl_slist pointer.
+         */
+        inline const curl_slist *second() const NOEXCEPT {
+            return (this->value).get();
+        }
+    private:
+        const T option;
+        const curl_header &value;
+    };
+
 }
 
-#endif	/* curl_header_H */
+#endif	/* defined(CURLCPP_CURL_HEADER_H) */
