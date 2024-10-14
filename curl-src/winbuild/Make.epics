@@ -12,7 +12,7 @@ INSTALL_DIR = $(abspath $(TOP)/install/$(EPICS_HOST_ARCH))
 
 # generate build option flags
 # not using WITH_SSL or SSL_PATH at moment
-CONFIG_FLAGS = GEN_PDB=yes ZLIB_PATH=$(ZLIB) SSL_PATH=$(OPENSSL) ENABLE_SCHANNEL=yes WITH_PREFIX=$(subst /,\,$(INSTALL_DIR))
+CONFIG_FLAGS = GEN_PDB=yes ZLIB_PATH=$(ZLIB) SSL_PATH=$(OPENSSL) ENABLE_WEBSOCKETS=yes ENABLE_SCHANNEL=yes WITH_PREFIX=$(subst /,\,$(INSTALL_DIR))
 
 ifneq ($(findstring win32-x86,$(EPICS_HOST_ARCH)),)
 CONFIG_FLAGS += MACHINE=x86
@@ -29,10 +29,12 @@ endif
 # add WITH_SSL=dll and WITH_SSL=static to appropriate places if using OpenSSL 
 ifneq ($(findstring static,$(EPICS_HOST_ARCH)),)
 # RTLIBCFG=static forces compile with /MT rather than /MD
-CONFIG_FLAGS += mode=static WITH_ZLIB=static RTLIBCFG=static
+CONFIG_FLAGS += mode=static RTLIBCFG=static WITH_ZLIB=static WITH_SSL=static
 else
-CONFIG_FLAGS += mode=dll WITH_ZLIB=dll
+CONFIG_FLAGS += mode=dll WITH_ZLIB=dll WITH_SSL=dll
+BIN_INSTALLS_WIN32 += $(OPENSSL)/bin/$(EPICS_HOST_ARCH)/*.dll
 endif
+
 include $(TOP)/configure/RULES
 
 #----------------------------------------
