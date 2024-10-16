@@ -5,6 +5,7 @@ O.*/
 /include
 /lib
 /templates
+/install/
 envPaths
 cdCommands
 dllPath.bat

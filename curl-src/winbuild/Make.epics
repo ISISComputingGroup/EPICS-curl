@@ -8,39 +8,32 @@ include $(TOP)/configure/CONFIG
 override MAKEFLAGS=
 
 # install directory name depends on configure options chosen
-INSTALL_DIR = $(TOP)/curl-src/builds/libcurl-vc
+INSTALL_DIR = $(abspath $(TOP)/install/$(EPICS_HOST_ARCH))
 
 # generate build option flags
 # not using WITH_SSL or SSL_PATH at moment
-#CONFIG_FLAGS = GEN_PDB=yes ZLIB_PATH=$(ZLIB) ENABLE_WINSSL=no WITH_SSL=dll SSL_PATH=$(OPENSSL)
-CONFIG_FLAGS = GEN_PDB=yes ZLIB_PATH=$(ZLIB) ENABLE_WINSSL=yes
+CONFIG_FLAGS = GEN_PDB=yes ZLIB_PATH=$(ZLIB) SSL_PATH=$(OPENSSL) ENABLE_WEBSOCKETS=yes ENABLE_SCHANNEL=yes WITH_PREFIX=$(subst /,\,$(INSTALL_DIR))
 
 ifneq ($(findstring win32-x86,$(EPICS_HOST_ARCH)),)
 CONFIG_FLAGS += MACHINE=x86
-INSTALL_DIR := $(INSTALL_DIR)-x86
 else
 CONFIG_FLAGS += MACHINE=x64
-INSTALL_DIR := $(INSTALL_DIR)-x64
 endif
 
 ifneq ($(findstring debug,$(EPICS_HOST_ARCH)),)
 CONFIG_FLAGS += DEBUG=yes
-INSTALL_DIR := $(INSTALL_DIR)-debug
 else
 CONFIG_FLAGS += DEBUG=no
-INSTALL_DIR := $(INSTALL_DIR)-release
 endif
 
+# add WITH_SSL=dll and WITH_SSL=static to appropriate places if using OpenSSL 
 ifneq ($(findstring static,$(EPICS_HOST_ARCH)),)
 # RTLIBCFG=static forces compile with /MT rather than /MD
-CONFIG_FLAGS += mode=static WITH_ZLIB=static RTLIBCFG=static
-INSTALL_DIR := $(INSTALL_DIR)-static-zlib-static
+CONFIG_FLAGS += mode=static RTLIBCFG=static WITH_ZLIB=static WITH_SSL=static
 else
-CONFIG_FLAGS += mode=dll WITH_ZLIB=dll
-INSTALL_DIR := $(INSTALL_DIR)-dll-zlib-dll
+CONFIG_FLAGS += mode=dll WITH_ZLIB=dll WITH_SSL=dll
+BIN_INSTALLS_WIN32 += $(OPENSSL)/bin/$(EPICS_HOST_ARCH)/*.dll
 endif
-
-INSTALL_DIR := $(INSTALL_DIR)-ipv6-sspi-winssl
 
 include $(TOP)/configure/RULES
 
@@ -51,6 +44,11 @@ include $(TOP)/configure/RULES
 # need to rename .lib on an install as it may be called e.g. libcurl_debug.lib
 ifdef T_A
 install:
+	-$(MKDIR) $(INSTALL_DIR)
+	-$(MKDIR) $(INSTALL_DIR)/bin
+	-$(MKDIR) $(INSTALL_DIR)/lib
+	-$(MKDIR) $(INSTALL_DIR)/include
+	-$(MKDIR) $(INSTALL_DIR)/include/curl
 	nmake -f Makefile.vc $(CONFIG_FLAGS)
 	-$(MKDIR) $(TOP)/bin
 	-$(MKDIR) $(TOP)/bin/$(T_A)
@@ -71,4 +69,4 @@ clean: myclean
 endif
 
 myclean:
-	nmake -f Makefile.vc $(CONFIG_FLAGS) clean 
+	nmake -f Makefile.vc $(CONFIG_FLAGS) clean

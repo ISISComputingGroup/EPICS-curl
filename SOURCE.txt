@@ -1,0 +1,2 @@
+libcurl https://curl.se/libcurl/
+curlcpp https://github.com/JosephP91/curlcpp

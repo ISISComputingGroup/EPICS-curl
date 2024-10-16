@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,19 +18,21 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 #include "test.h"
 
 #include "memdebug.h"
 
-int test(char *URL)
+CURLcode test(char *URL)
 {
   const unsigned char a[] = {0x2f, 0x3a, 0x3b, 0x3c, 0x3d, 0x3e, 0x3f,
                              0x91, 0xa2, 0xb3, 0xc4, 0xd5, 0xe6, 0xf7};
   CURLcode res = CURLE_OK;
   char *ptr = NULL;
   int asize;
-  int outlen;
+  int outlen = 0;
   char *raw;
 
   (void)URL; /* we don't use this */
@@ -47,11 +49,11 @@ int test(char *URL)
 
   /* deprecated API */
   ptr = curl_escape((char *)a, asize);
-  printf("%s\n", ptr);
   if(!ptr) {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
+  printf("%s\n", ptr);
 
   raw = curl_easy_unescape(NULL, ptr, (int)strlen(ptr), &outlen);
   printf("outlen == %d\n", outlen);
@@ -85,5 +87,5 @@ test_cleanup:
   curl_free(ptr);
   curl_global_cleanup();
 
-  return (int)res;
+  return res;
 }

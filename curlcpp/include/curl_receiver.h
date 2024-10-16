@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2014 - Giuseppe Persico
+ * Copyright (c) 2023 - Giuseppe Persico
  * File - curl_receiver.h
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,16 +23,14 @@
  * SOFTWARE.
  */
 
-#ifndef __curlcpp__curl_receiver__
-#define __curlcpp__curl_receiver__
+#ifndef CURLCPP_CURL_RECEIVER_H
+#define CURLCPP_CURL_RECEIVER_H
 
 #include <array>
 #include "curl_easy.h"
 
-using std::array;
-using curl::curl_easy;
-
 namespace curl {
+
     /**
      * This class implements a receiver that allow users to receive raw
      * data on an established connection on an easy handler.
@@ -47,7 +45,7 @@ namespace curl {
         /**
          * In this case the destructor does not have to release any resource.
          */
-        ~curl_receiver() {}
+        ~curl_receiver() = default;
         /**
          * The receive method wraps curl_easy_recv function and receives raw
          * data from the established connection on an easy handler.
@@ -57,7 +55,7 @@ namespace curl {
          * Simple getter method that returns the buffer with the received
          * data.
          */
-        const array<T,SIZE> get_buffer() const;
+        std::array<T,SIZE> get_buffer() const;
         /**
          * Simple getter method that returns the number of received bytes.
          * Real applications should check this number to ensure that the
@@ -65,17 +63,17 @@ namespace curl {
          */
         size_t get_received_bytes() const;
     private:
-        array<T,SIZE> _buffer;
+        std::array<T,SIZE> _buffer;
         size_t _recv_bytes;
     };
-    
+
     // Implementation of constructor.
     template<typename T, const size_t SIZE> curl_receiver<T,SIZE>::curl_receiver() : _recv_bytes(0) {
         if (SIZE <= 0) {
             throw curl_exception("Buffer size can not be less or equal to zero",__FUNCTION__);
         }
     }
-    
+
     // Implementation of receive method.
     template<typename T, const size_t SIZE> bool curl_receiver<T,SIZE>::receive(curl_easy &easy) {
         const CURLcode code = curl_easy_recv(easy.get_curl(),&_buffer,SIZE,&_recv_bytes);
@@ -87,16 +85,16 @@ namespace curl {
         }
         return true;
     }
-    
+
     // Implementation of get_buffer method.
-    template<typename T, const size_t SIZE> inline const array<T,SIZE> curl_receiver<T,SIZE>::get_buffer() const {
+    template<typename T, const size_t SIZE> inline std::array<T,SIZE> curl_receiver<T,SIZE>::get_buffer() const {
         return _buffer;
     }
-    
+
     // Implementation of get_received_buffer method.
     template<typename T, const size_t SIZE> inline size_t curl_receiver<T,SIZE>::get_received_bytes() const {
         return _recv_bytes;
     }
 }
 
-#endif /* defined(__curlcpp__curl_receiver__) */
+#endif /* defined(CURLCPP_CURL_RECEIVER_H) */
