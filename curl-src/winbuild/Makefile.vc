@@ -317,4 +317,4 @@ clean:
 	@if exist $(LIBCURL_DIROBJ) rd /s /q $(LIBCURL_DIROBJ)
 	@if exist $(CURL_DIROBJ) rd /s /q $(CURL_DIROBJ)
 	@if exist $(DIRDIST) rd /s /q $(DIRDIST)
-	$(MAKE) /NOLOGO /F MakefileBuild.vc $@
+	@if exist CURL_OBJS.inc $(MAKE) /NOLOGO /F MakefileBuild.vc $@
