@@ -70,3 +70,4 @@ endif
 
 myclean:
 	nmake -f Makefile.vc $(CONFIG_FLAGS) clean
+    $(RM) CURL_OBJS.inc LIBCURL_OBJS.inc
